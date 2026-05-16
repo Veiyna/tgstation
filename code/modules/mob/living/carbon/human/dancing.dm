@@ -231,6 +231,7 @@
 			head += d_overlays[EYES_LAYER]
 			head += d_overlays[EARS_LAYER]
 			head += d_overlays[FACEMASK_LAYER]
+			head += d_overlays[HAIR_LAYER]
 			head += d_overlays[BENEATH_HAIR_LAYER]
 			head += d_overlays[ABOVE_BODY_FRONT_GLASSES_LAYER]
 			head += d_overlays[ABOVE_BODY_FRONT_HEAD_LAYER]
