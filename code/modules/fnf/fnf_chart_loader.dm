@@ -23,6 +23,7 @@ GLOBAL_LIST_INIT(fnf_songs, list(
 	"Ugh"               = "ugh",
 	"Guns"              = "guns",
 	"Stress"            = "stress",
+	"Chiller"           = "chiller",
 ))
 
 /**
@@ -45,7 +46,8 @@ GLOBAL_LIST_INIT(fnf_songs, list(
 		if("dad")     return "Dad"
 		if("mom")     return "Mom"
 		if("pico")    return "Pico"
-		if("spooky")  return "Spooky Kids"
+		if("spooky")  return "Skid & Pump"
+		if("darnell") return "Darnell"
 		if("monster") return "Monster"
 		if("senpai")  return "Senpai"
 		if("spirit")  return "Spirit"

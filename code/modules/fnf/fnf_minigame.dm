@@ -8,6 +8,15 @@
 #define FNF_HEALTH_STEP     6       // health change per hit/miss
 #define FNF_SLOT_Y          64      // pixel_y of the arrow slot row (above mob head)
 #define FNF_ARROW_SPAWN_Y  -64      // where arrows first appear (below, scrolls up to FNF_SLOT_Y)
+#define FNF_AUDIO_OFFSET   2       // ticks to delay note scheduling (accounts for audio startup latency)
+
+/// Song-specific theme overrides.  key = song_dir, value = list("portraits" = list(..), "bar_colors" = list(..)).
+GLOBAL_LIST_INIT(fnf_song_themes, list(
+	"chiller" = list(
+		"portraits"  = list("player" = 'icons/mob/bf_corrupt.dmi', "enemy" = 'icons/mob/pico_corrupt.dmi'),
+		"bar_colors" = list("player" = "#1f1a2f", "enemy" = "#b7d855"),
+	),
+))
 
 /datum/fnf_minigame
 	var/datum/weakref/player_ref
@@ -18,7 +27,7 @@
 
 	var/battle_active  = FALSE
 	var/list/chart_notes
-	var/song_dir
+	var/song_adir
 	var/song_name      = "Unknown"
 	var/song_bpm       = 100
 	/// Song end time in ticks from begin(), set by the microphone from combined chart data.
@@ -30,11 +39,19 @@
 	var/song_end_timer
 
 	// ── Healthbar ────────────────────────────────────────────────────────────
+
+	#define FNF_MISS_FLASH_TIME 3  // ticks to show blue miss overlay (0.3 s)
 	/// 0–100 from challenger's view. Only the master (is_player_side=TRUE) updates this.
 	var/health_pct         = 50
 	var/image/hud_bar_img
 	var/image/hud_pl_head_img   // BF portrait — right end of bar (green side)
 	var/image/hud_en_head_img   // Pico portrait — left end of bar (red side)
+
+	// ── Song-specific theming ────────────────────────────────────────────────
+	/// Override portrait icons per song dir: list("player" = 'icon.dmi', "enemy" = 'icon.dmi') or null
+	var/list/song_portraits
+	/// Override healthbar colours per song dir: list("player" = "#hex", "enemy" = "#hex") or null
+	var/list/song_bar_colors
 
 // ── Construction ───────────────────────────────────────────────────────────
 
@@ -98,6 +115,13 @@
 		stage_obj = new /obj/effect/fnf_stage(mid_turf)
 
 		send_battle_audio(player, opp)
+
+		// Apply song-specific theming
+		var/list/theme = GLOB.fnf_song_themes[song_dir]
+		if(theme)
+			song_portraits  = theme["portraits"]
+			song_bar_colors = theme["bar_colors"]
+
 		create_health_hud(player, opp)
 
 	schedule_notes()
@@ -134,13 +158,17 @@
 	hud_bar_img.pixel_x = -48
 	hud_bar_img.pixel_y = FNF_HUD_Y
 
+	// Determine portrait icons (song override or defaults)
+	var/player_icon = song_portraits?["player"] || 'icons/mob/bf.dmi'
+	var/enemy_icon  = song_portraits?["enemy"]  || 'icons/mob/pico.dmi'
+
 	// BF portrait — RIGHT end of bar (green / player side). bf.dmi already faces left.
-	hud_pl_head_img = image(icon = 'icons/mob/bf.dmi', icon_state = "normal", loc = stage_obj, layer = ABOVE_ALL_MOB_LAYER + 3)
+	hud_pl_head_img = image(icon = player_icon, icon_state = "normal", loc = stage_obj, layer = ABOVE_ALL_MOB_LAYER + 3)
 	hud_pl_head_img.pixel_x = x_shift + (FNF_BAR_WIDTH / 2 + FNF_HEAD_SIZE / 2 + 4)
 	hud_pl_head_img.pixel_y = portrait_y
 
 	// Pico portrait — LEFT end of bar (red / enemy side). pico.dmi faces right toward BF.
-	hud_en_head_img = image(icon = 'icons/mob/pico.dmi', icon_state = "normal", loc = stage_obj, layer = ABOVE_ALL_MOB_LAYER + 3)
+	hud_en_head_img = image(icon = enemy_icon, icon_state = "normal", loc = stage_obj, layer = ABOVE_ALL_MOB_LAYER + 3)
 	hud_en_head_img.pixel_x = x_shift - (FNF_BAR_WIDTH / 2 + FNF_HEAD_SIZE / 2 + 4)
 	hud_en_head_img.pixel_y = portrait_y
 
@@ -169,13 +197,17 @@
 	var/red_w   = round((100 - health_pct) * inner_w / 100)
 	red_w = clamp(red_w, 0, inner_w)
 
+	// Determine bar colours (song override or defaults)
+	var/player_color = song_bar_colors?["player"] || "#22dd55"
+	var/enemy_color  = song_bar_colors?["enemy"]  || "#dd2222"
+
 	// Red — enemy side, LEFT
 	if(red_w > 0)
-		bar.DrawBox("#dd2222", 2, 2, red_w + 1, FNF_BAR_HEIGHT - 1)
+		bar.DrawBox(enemy_color, 2, 2, red_w + 1, FNF_BAR_HEIGHT - 1)
 
 	// Green — player side, RIGHT
 	if(red_w < inner_w)
-		bar.DrawBox("#22dd55", red_w + 2, 2, FNF_BAR_WIDTH - 1, FNF_BAR_HEIGHT - 1)
+		bar.DrawBox(player_color, red_w + 2, 2, FNF_BAR_WIDTH - 1, FNF_BAR_HEIGHT - 1)
 
 	// White divider at the split point
 	var/div_x = clamp(red_w + 1, 2, FNF_BAR_WIDTH - 2)
@@ -224,7 +256,7 @@
 
 /datum/fnf_minigame/proc/schedule_notes()
 	for(var/list/note in chart_notes)
-		var/spawn_delay = max(0, note["t"] / 100 - FNF_SCROLL_ADVANCE)
+		var/spawn_delay = max(0, note["t"] / 100 - FNF_SCROLL_ADVANCE + FNF_AUDIO_OFFSET)
 		addtimer(CALLBACK(src, PROC_REF(spawn_note_visual), note), spawn_delay, TIMER_DELETE_ME)
 
 	// Only the master game controls the song end — slave (enemy) game must not set its own timer.
@@ -274,6 +306,10 @@
 	cached_arrows[direction]["active_queue"] -= arrow
 	animate(arrow, alpha = 0, time = 0.5)
 	QDEL_IN(arrow, 0.5 SECONDS)
+	// ── Miss: arrow expired without being hit ──
+	report_health_event(FALSE)
+	play_miss_sound()
+	flash_player_blue()
 
 // ── Movement blocking ──────────────────────────────────────────────────────
 
@@ -318,6 +354,40 @@
 		if(!QDELETED(slot))
 			flick("blank_arrow_lose", slot)
 	report_health_event(FALSE)
+	play_miss_sound()
+	flash_player_blue()
+
+// ── Miss helpers ──────────────────────────────────────────────────────────
+
+/datum/fnf_minigame/proc/play_miss_sound()
+	var/mob/living/player = player_ref?.resolve()
+	if(!player)
+		return
+	var/miss_file = "sound/fnf/shared/missnote[rand(1,3)].ogg"
+	var/sound/miss_sound = sound(miss_file, channel = 1026, volume = 50)
+	SEND_SOUND(player, miss_sound)
+
+/datum/fnf_minigame/proc/flash_player_blue()
+	var/mob/living/player = player_ref?.resolve()
+	if(!player || QDELETED(player))
+		return
+	// Add a blue color matrix to the player for a short time
+	// This matrix increases blue channel and reduces red/green slightly
+	var/blue_matrix = list(
+		0.6, 0.1, 0.1, 0,
+		0.1, 0.6, 0.1, 0,
+		0.1, 0.1, 1.2, 0,
+		0,   0,   0,   1
+	)
+	player.add_atom_colour(blue_matrix, TEMPORARY_COLOUR_PRIORITY)
+	addtimer(CALLBACK(src, PROC_REF(remove_blue_flash), WEAKREF(player)), FNF_MISS_FLASH_TIME, TIMER_DELETE_ME)
+
+/datum/fnf_minigame/proc/remove_blue_flash(datum/weakref/weak_player)
+	var/mob/living/player = weak_player?.resolve()
+	if(!QDELETED(player))
+		player.remove_atom_colour(TEMPORARY_COLOUR_PRIORITY)
+
+
 
 // ── Dance poses ────────────────────────────────────────────────────────────
 
@@ -435,6 +505,8 @@
 #undef FNF_HEALTH_STEP
 #undef FNF_SLOT_Y
 #undef FNF_ARROW_SPAWN_Y
+#undef FNF_AUDIO_OFFSET
+#undef FNF_MISS_FLASH_TIME
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
