@@ -79,13 +79,13 @@
 	clear_challenge()
 
 	// Compute combined song end from the max last-note time across both charts,
-	// then add a 30-second buffer so the song always plays to completion.
+	// then add a 15-second buffer so the song always plays to completion.
 	var/combined_last_t = 0
 	if(length(player_notes))
 		combined_last_t = max(combined_last_t, player_notes[length(player_notes)]["t"])
 	if(length(enemy_notes))
 		combined_last_t = max(combined_last_t, enemy_notes[length(enemy_notes)]["t"])
-	var/end_ticks = combined_last_t / 100 + 50    // ticks: last note + 5 s buffer
+	var/end_ticks = combined_last_t / 100 + 150    // ticks: last note + 15 s buffer
 
 	challenger.visible_message(span_boldnotice("[challenger] challenges [opponent] to a rhythm battle!"))
 
