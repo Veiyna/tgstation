@@ -14,7 +14,7 @@
 GLOBAL_LIST_INIT(fnf_song_themes, list(
 	"chiller" = list(
 		"portraits"  = list("player" = 'icons/mob/bf_corrupt.dmi', "enemy" = 'icons/mob/pico_corrupt.dmi'),
-		"bar_colors" = list("player" = "#1f1a2f", "enemy" = "#9fbd48"),
+		"bar_colors" = list("player" = "#2b1a2f", "enemy" = "#9fbd48"),
 	),
 ))
 
