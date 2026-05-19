@@ -647,6 +647,24 @@
 	message = "waves."
 	animation_key = "wave"
 
+/datum/emote/living/omnitwerk
+	key = "omnitwerk"
+	key_third_person = "omnitwerks"
+	message = "omnitwerks."
+	animation_key = "omnitwerk"
+
+/datum/emote/living/mothplushie
+	key = "mothplushie"
+	key_third_person = "mothplushies"
+	message = "mothplushies."
+	animation_key = "mothplushie"
+
+/datum/emote/living/darnedcaboose
+	key = "darnedcaboose"
+	key_third_person = "darnedcaboose"
+	message = "darnedcaboose."
+	animation_key = "darnedcaboose"
+
 /datum/emote/living/whimper
 	key = "whimper"
 	key_third_person = "whimpers"
