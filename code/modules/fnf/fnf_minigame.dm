@@ -27,7 +27,7 @@ GLOBAL_LIST_INIT(fnf_song_themes, list(
 
 	var/battle_active  = FALSE
 	var/list/chart_notes
-	var/song_adir
+	var/song_dir
 	var/song_name      = "Unknown"
 	var/song_bpm       = 100
 	/// Song end time in ticks from begin(), set by the microphone from combined chart data.
