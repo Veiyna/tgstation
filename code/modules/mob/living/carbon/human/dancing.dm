@@ -111,6 +111,7 @@
 // Will copy the overlays of a limb or torso
 // Limbs are nested in the torso via vis_contents so they inherit the torso's transform
 /obj/effect/dancing_limb
+	appearance_flags = PIXEL_SCALE
 	var/datum/dance_sprites/my_holder
 
 // Good faith effort to relay clicks to the actual human mob
