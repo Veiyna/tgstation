@@ -1092,7 +1092,6 @@
 #include "code\datums\bodypart_overlays\markings_bodypart_overlay.dm"
 #include "code\datums\bodypart_overlays\mutant_bodypart_overlay.dm"
 #include "code\datums\bodypart_overlays\simple_bodypart_overlay.dm"
-#include "code\datums\bodypart_overlays\fingers_bodypart_overlay.dm"
 #include "code\datums\bodypart_overlays\texture_bodypart_overlay.dm"
 #include "code\datums\brain_damage\brain_trauma.dm"
 #include "code\datums\brain_damage\creepy_trauma.dm"

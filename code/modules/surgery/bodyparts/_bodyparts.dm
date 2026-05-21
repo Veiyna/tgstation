@@ -1310,6 +1310,23 @@
 		aux = image(limb.icon, "[limb_id]_[aux_zone]", -aux_layer, dir = image_dir)
 		. += aux
 
+	if(!dropped && istype(src, /obj/item/bodypart/arm))
+		var/is_left = (body_zone == BODY_ZONE_L_ARM)
+		var/finger_dir = is_left ? WEST : EAST
+		for(var/i in 1 to 5)
+			var/image/finger = image(
+				'icons/mob/human/species/moth/bodyparts.dmi',
+				is_left ? "moth_l_arm" : "moth_r_arm",
+				-(BODYPARTS_HIGH_LAYER - 2),
+				dir = finger_dir
+			)
+			finger.color = is_husked ? husk_color : draw_color
+			finger.transform = matrix().Scale(0.3, 0.5)
+			var/fan = (is_left ? (3 - i) : (i - 3))
+			finger.pixel_x = (is_left ? -12 : 12) + fan * 3
+			finger.pixel_y = -2
+			. += finger
+
 	if(dropped && dmg_overlay_type)
 		if(brutestate)
 			// divided into two overlays: one that gets colored and one that doesn't.

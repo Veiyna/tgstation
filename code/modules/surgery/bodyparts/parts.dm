@@ -322,14 +322,6 @@
 		Latin 'sinestra' (left hand), because the left hand was supposed to \
 		be possessed by the devil? This arm appears to be possessed by no \
 		one though."
-
-/obj/item/bodypart/arm/left/Initialize(mapload)
-	. = ..()
-	for(var/i in 1 to 5)
-		var/datum/bodypart_overlay/simple/finger/finger = new()
-		finger.finger_position = i
-		finger.side = "l"
-		add_bodypart_overlay(finger)
 	icon_state = "default_human_l_arm"
 	body_zone = BODY_ZONE_L_ARM
 	body_part = ARM_LEFT
@@ -424,14 +416,6 @@
 	bodypart_trait_source = RIGHT_ARM_TRAIT
 	butcher_replacement = /obj/item/bodypart/arm/right/skeleton/nonfunctional
 	stump_typepath = /obj/item/bodypart/arm/right/stump
-
-/obj/item/bodypart/arm/right/Initialize(mapload)
-	. = ..()
-	for(var/i in 1 to 5)
-		var/datum/bodypart_overlay/simple/finger/finger = new()
-		finger.finger_position = i
-		finger.side = "r"
-		add_bodypart_overlay(finger)
 
 /obj/item/bodypart/arm/right/apply_ownership(mob/living/carbon/new_owner)
 	if(HAS_TRAIT(new_owner, TRAIT_PARALYSIS_R_ARM))
