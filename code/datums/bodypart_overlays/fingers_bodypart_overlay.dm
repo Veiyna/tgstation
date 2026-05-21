@@ -10,12 +10,12 @@
 /datum/bodypart_overlay/simple/finger/get_image(layer, obj/item/bodypart/limb)
 	var/icon_state_name = (side == "l") ? "moth_l_arm" : "moth_r_arm"
 	var/mutable_appearance/appearance = mutable_appearance(icon, icon_state_name, layer = layer)
-	appearance.transform = matrix().Scale(0.6, 0.6)
-	// pixel_y positive = UP. Hands are at the bottom of the sprite, so negative Y.
+	appearance.transform = matrix().Scale(0.35, 0.7)
+	// pixel_y positive = UP. Hands are below center but not at the floor.
 	// Left hand extends to the LEFT of center (negative X), right hand to the RIGHT (positive X).
 	// Thumb is on the inner side (toward body), pinky on the outer side.
 	var/hand_center = (side == "l") ? -20 : 20
-	var/hand_y = -14
+	var/hand_y = -6
 	// Fan: thumb (inner, smaller offset) to pinky (outer, larger offset)
 	var/fan_offset = (side == "l") ? (3 - finger_position) : (finger_position - 3)
 	appearance.pixel_x = hand_center + fan_offset * 2
